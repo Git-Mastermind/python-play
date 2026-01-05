@@ -1,5 +1,5 @@
 from datetime import datetime
-def check_prime_number(num):
+def check_prime_number(num):  # RETURNS: Boolean for is_prime, and run time
     start_time = datetime.now()  # starting the timer
     factors = []  # empty list for factors
     for i in range(1, num + 1):
@@ -9,18 +9,8 @@ def check_prime_number(num):
     run_time = end_time - start_time
 
     if factors == [1, num]:  # if the number is a prime number
-        return "✅ prime number", run_time  # return that it is a prime number and the run time
+        return True, run_time  # return that it is a prime number and the run time
     else:
-        return "☑️ not prime number", run_time  # return that it is not a prime number and the run time
+        return False, run_time  # return that it is not a prime number and the run time
 
-num = int(input("Number: "))  # getting the number from the user
 
-answer = check_prime_number(num)  # output of the function (TUPLE) goes into answer
-
-prime_number_check = answer[0]  # first part goes into a variable
-
-run_time = answer[1]  # runtime also goes in a variable
-
-print(prime_number_check)  # print if it is a prime number
-
-print(run_time)  # print the runtime

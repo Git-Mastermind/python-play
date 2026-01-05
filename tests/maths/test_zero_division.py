@@ -1,4 +1,4 @@
-from src.division import divide
+from maths.division import divide
 
 def test_zero_division_error_is_successful(dividend, divisor):
     try:

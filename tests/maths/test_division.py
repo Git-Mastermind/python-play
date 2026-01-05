@@ -1,4 +1,4 @@
-from src.division import divide
+from maths.division import divide
 
 def test_division_is_successful(dividend, divisor, expected_quotient, expected_remainder):     # Divisor, what we will pas through the function above
     answer = divide(dividend, divisor)  # Calling the function and passing through our dividend and divisor. return type: TUPLE

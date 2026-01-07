@@ -1,11 +1,13 @@
 import math
 
 def logarithms(result, base):
-    power_counter = 0
+    exponent = 0
+    if result == 0:
+        raise RuntimeError("Invalid result for log")
     while result != 1:
         result /= base
-        power_counter += 1
-    return power_counter
+        exponent += 1
+    return exponent
 
 
 print(logarithms(16, 2))

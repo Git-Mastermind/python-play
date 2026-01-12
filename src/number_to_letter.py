@@ -33,10 +33,41 @@ teens = {
 }
 
 number = input("Enter a number: ")
-hundreds_place = base_numbers[int(number[0])]
-if int(number) < 100:
-    print("Wrong domain! needs to be less than 100")
+thousands_place = base_numbers[int(number[0])]
+# hundreds_place = base_numbers[int(number[1])]
+
+
+if int(number) < 1 or len(number) > 4:
+    print("nope")
 else:
+    if len(number) == 1:
+        base_numbers[int(number)]
+        print(f"{base_numbers[int(number)]}")
+        quit()
+
+    elif len(number) == 2:
+        tens_place = tens[int(number[0])] + " " + base_numbers[int(number[1])]
+        print(f"{tens_place}")
+        quit()
+    
+    elif len(number) == 4:
+        if number[1] == 0:
+            if int(number[2]) < 2:
+                tens_place = teens[int(f"{number[2]}{number[3]}")]
+            else:
+                tens_place = tens[int(number[2])] + " " + base_numbers[int(number[3])]
+            print(f"{thousands_place} thousand and {tens_place}")
+        else:
+            hundreds_place = number[1]
+            if int(number[2]) < 2:
+                tens_place = teens[int(f"{number[2]}{number[3]}")]
+            else:
+                tens_place = tens[int(number[2])] + " " + base_numbers[int(number[3])]
+                print(f"{thousands_place} thousand {hundreds_place} hundred and {tens_place}")
+
+            
+        quit()
+
     if int(number[1]) == 0:
         tens_place = base_numbers[int(number[2])]
     else:

@@ -33,25 +33,13 @@ teens = {
 }
 
 number = input("Enter a number: ")
-single_number_for_thousands = base_numbers[int(number[3])]
 
-if len(number) == 4:
-    thousands_place = base_numbers[int(number[0])]
+if len(base_numbers[int(number)]) == 4:
+    thousands = number[0]
+    hundreds = 0
+    tens = 0
     if int(number[1]) == 0:
-        if int(number[2]) < 2:
-            tens_place = teens[int(f"{number[2]}{number[3]}")]
-        else:
-            tens_place = tens[int(number[2])] + " " + base_numbers[int(number[3])]
-        print(f"{thousands_place} thousand and {tens_place}")
-
-    elif int(number[2]) == 0:
-        hundreds_place = base_numbers[number[1]]
-        print(f"{thousands_place} thousand {hundreds_place} hundred and {single_number_for_thousands}")
-
-    else:
-        hundreds_place = base_numbers[number[1]]
-        if int(number[2]) < 2:
-            tens_place = teens[int(f"{number[2]}{number[3]}")]
-        else:
-            tens_place = tens[int(number[2])] + " " + base_numbers[int(number[3])]
-        print(f"{thousands_place} thousand {hundreds_place} hundred and {tens_place}")
+        if int(number[2]) == 1:
+            tens = teens[int(f"{number[2]}{number[3]}")]
+            print(f"{thousands} thousand and {tens}")
+            

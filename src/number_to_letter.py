@@ -1,4 +1,5 @@
 base_numbers = {
+    0:"zero",
     1:"one",
     2:"two",
     3:"three",
@@ -11,6 +12,7 @@ base_numbers = {
 }
 
 tens = {
+    1:"ten",
     2:"twenty",
     3:"thirty",
     4:"fourty",
@@ -38,8 +40,8 @@ thousands_place = base_numbers[int(number[0])]
 # hundreds_place = base_numbers[int(number[1])]
 
 
-if int(number) < 1 or len(number) > 4:
-    print("nope")
+if int(number) < 0 or len(number) > 4:
+    print("invalid domain")
 else:
     if len(number) == 1:
         base_numbers[int(number)]
@@ -47,7 +49,10 @@ else:
         quit()
 
     elif len(number) == 2:
-        tens_place = tens[int(number[0])] + " " + base_numbers[int(number[1])]
+        if int(number[1]) == 0:
+            tens_place = tens[int(number[0])]
+        else:
+            tens_place = tens[int(number[0])] + " " + base_numbers[int(number[1])]
         print(f"{tens_place}")
         quit()
 
@@ -59,7 +64,10 @@ else:
             if int(number[1]) < 2:
                 tens_place = teens[int(f"{number[1]}{number[2]}")]
             else:
-                tens_place = tens[int(number[1])] + " " + base_numbers[int(number[2])]
+                if int(number[2]) == 0:
+                    tens_place = tens[int(number[1])]
+                else:
+                    tens_place = tens[int(number[1])] + " " + base_numbers[int(number[2])]
         print(f"{base_numbers[int(hundreds_place)]} hundred and {tens_place}")
     
     elif len(number) == 4:
@@ -75,6 +83,10 @@ else:
             hundreds_place = number[1]
             tens_place = base_numbers[int(number[3])]
             print(f"{thousands_place} thousand {base_numbers[int(hundreds_place)]} hundred and {tens_place}")
+        elif int(number[3]) == 0:
+            hundreds_place = number[1]
+            tens_place = tens[int(number[2])]
+            print(f"{thousands_place} thousand {base_numbers[int(hundreds_place)]} hundred and {tens_place}")
         else:
             hundreds_place = number[1]
             if int(number[2]) < 2:
@@ -84,5 +96,5 @@ else:
                 print(f"{thousands_place} thousand {base_numbers[int(hundreds_place)]} hundred and {tens_place}")
 
             
-        quit()
+        
 

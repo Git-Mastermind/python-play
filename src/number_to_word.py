@@ -116,7 +116,7 @@ def number_to_word(number):
 def find_place_values(number):
     quotient = number
     remainder = 0
-    
+
     while quotient >= 10:
         remainder = quotient % 10
         quotient = quotient // 10
@@ -124,4 +124,5 @@ def find_place_values(number):
     print(quotient)
         
 
-find_place_values(123)
+def number_to_word_advanved():
+    

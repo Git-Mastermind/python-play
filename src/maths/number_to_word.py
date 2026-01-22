@@ -124,5 +124,44 @@ def find_place_values(number):
     print(quotient)
         
 
-def number_to_word_advanved():
+def number_to_word_place_value(number):
+    place_values = []
+    quotient = number
+    remainder = 0
+    while quotient >= 10:
+        remainder = quotient % 10
+        quotient = quotient // 10
+        place_values.append(remainder)
+    place_values.append(quotient)
+    ones = base_numbers[place_values[0]]
+
+    if len(place_values) == 1:
+        print(f"{ones}")
+    
+    elif len(place_values) == 2:
+        tens_place = tens[place_values[1]]
+        if place_values[0] == 0:
+            print(f"{tens_place}")
+        else:
+            print(f"{tens_place} {ones}")
+    
+    elif len(place_values) == 3:
+        tens_place = tens[place_values[1]]
+        if place_values[1] == 0:
+            hundreds_place = base_numbers[place_values[2]]
+            print(f"{hundreds_place} hundred and {tens_place}")
+        hundreds_place = base_numbers[place_values[2]]
+        print(f"{hundreds_place} hundred and {tens_place} {ones}")
+    
+    elif len(place_values) == 4:
+        tens_place = tens[place_values[1]]
+        hundreds_place = base_numbers[place_values[2]]
+        thousands_place = base_numbers[place_values[3]]
+
+        print(f"{thousands_place} thousand {hundreds_place} hundred and {tens_place} {ones}")
+    
+        
+
+number = int(input("Number: "))
+number_to_word_place_value(number)
     

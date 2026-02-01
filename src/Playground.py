@@ -1,34 +1,30 @@
-def make_abbreviation(input_word):
-    word = list(input_word)
-    abbreviation_num = len(word) - 2
-    word[0:abbreviation_num] = [str(abbreviation_num)]
-    return word
+def mergeAlternately(word1: str, word2: str) -> str:
+    first_word = list(word1)
+    second_word = list(word2)
+    merged_string = []
+    loop_run_time = min(len(first_word), len(second_word))
+    for i in range(loop_run_time):
 
+        merged_string.append(first_word[i])
 
+        merged_string.append(second_word[i])
 
+    if len(first_word) > loop_run_time:
 
-def abbreviation(input_word, input_abbreviation):
-    word = list(input_word)
-    abbreviation = list(input_abbreviation)
-    numbers = ["1", "2", "3", "4", "5", "6" ,"7", "8", "9"]
-    number_provided = 0
-    letter_count = 0
-    for i in range(len(abbreviation)):
-        if abbreviation[i] not in numbers:
-            if number_provided != 0:
-                if abbreviation[i] == word[i + (number_provided - 1)]:
-                    letter_count += 1
-                else:
-                    return f"abbreviation: {make_abbreviation(input_word)}"
-            else:
-                if abbreviation[i] == word[i]:
-                    letter_count += 1
-                else:
-                    return f"abbreviation: {make_abbreviation(input_word)}"
-        else:
-            number_provided = int(abbreviation[i])
-    if letter_count + number_provided == len(word):
-        return "yes"
+        for i in range(loop_run_time - 1, len(first_word)):
+
+            merged_string.append(first_word[i])
+
+        return "".join(merged_string)
     
-print(abbreviation(input_word="calender", input_abbreviation="c4nder"))
-make_abbreviation(input_word="calendar")
+    elif len(second_word) > loop_run_time:
+
+        for i in range(loop_run_time - 1, len(second_word)):
+
+            merged_string.append(second_word[i])
+
+        return "".join(merged_string)
+    else:
+        return "".join(merged_string)
+
+print(mergeAlternately(word1="ab", word2="pqrs"))

@@ -59,7 +59,9 @@ class Stack():
         for i in range(len(string)):
             reversed_string.append(self.pop())
         return "".join(reversed_string)
+    
+    
 
 stacks = Stack()
-print(stacks.reverse_string("Hello"))
+
             

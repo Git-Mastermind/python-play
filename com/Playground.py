@@ -1,11 +1,15 @@
-def reverse(x: int) -> int:
-    nums = list(map(int, str(x)))
-    reversed_integer = []
-    for i in range(len(nums)):
-        if i == 0:
-            reversed_integer.append(nums[-1]) 
-        else:
-            reversed_integer.append(nums[-i])
-    return int("".join(str(i) for i in reversed_integer))
+import cv2
 
-print(reverse(x=123))
+alg = r"C:\Workspaces\python-play\com\haarcascade_frontalface_default.xml"
+haar_cascade = cv2.CascadeClassifier(alg)
+file_name = r"C:\Workspaces\python-play\com\harry potter cast.webp"
+img = cv2.imread(file_name, 0)
+
+faces = haar_cascade.detectMultiScale(img, scaleFactor=1.05, minNeighbors=2, minSize=(100,100))
+i = 0
+
+for x,y,w,h in faces:
+    cropped_image = img[y:y + h, x:x + w]
+    target_file_name = "stored-faces/" + str(i) + ".jpg"
+    cv2.imwrite(target_file_name, cropped_image,)
+    i += 1

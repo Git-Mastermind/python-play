@@ -7,7 +7,7 @@ import psycopg2
 
 
 
-conn = psycopg2.connect("postgres://avnadmin:AVNS_BYdgCCV7eMhTLlgXBZv@pg-169561b0-eshanjha1234-facerecognitionschool.a.aivencloud.com:13734/defaultdb?sslmode=require")
+
 
 for filename in os.listdir("stored-faces"):
     img = Image.open("stored-faces/" + filename)

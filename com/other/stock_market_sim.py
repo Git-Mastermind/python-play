@@ -7,7 +7,7 @@ import sys
 
 API_KEY = sys.argv[1]
 
-user_id = ""
+
 if "show_buy" not in st.session_state:
     st.session_state.show_buy = False
 if "sign_up_true_false" not in st.session_state:
@@ -18,6 +18,9 @@ if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 if "balance_button" not in st.session_state:
     st.session_state.balance_button = False
+if "user_id" not in st.session_state:
+    st.session_state.user_id = ""
+
 connection = mysql.connector.connect(
     host="localhost",
     port = 3306,
@@ -26,13 +29,6 @@ connection = mysql.connector.connect(
     database="stocks_db"
 )
 
-initialize_database = st.button("Initialize Database")
-
-if initialize_database:
-    st.write('Initializing Database...')
-    time.sleep(0.8)
-    st.write('Connected to mySQL!')
-    time.sleep(0.3)
     
 
 cursor = connection.cursor()
@@ -54,6 +50,8 @@ def sign_up(email, name):
     time.sleep(0.4)
     st.write(f"✅ Successfully signed up! Your user id is {user_id}!")
     st.session_state.logged_in = True
+    st.session_state.user_id = user_id
+    st.rerun()
 
 def log_in(user_id):
     cursor.execute(f'SELECT name FROM users WHERE user_id = "{user_id}";')
@@ -64,27 +62,36 @@ def log_in(user_id):
         time.sleep(1)
         st.write(f"✅ Successfully logged in! Welcome {name[0][0]}")
         st.session_state.logged_in = True
+        st.session_state.user_id = user_id
         time.sleep(0.8)
-        return user_id
         st.rerun()
+        return user_id
+        
     else:
         st.write("❌ User Id not found")
 
 def buy_stock(company_name, amount):
     response = requests.get(f"https://finnhub.io/api/v1/search?q={company_name}&token={API_KEY}")
     symbol_data = response.json()
-    price = requests.get(f'https://finnhub.io/api/v1/quote?symbol={symbol_data["result"][0]["displaySymbol"]}&token={API_KEY}')
-    price_data = price.json()
-    st.write(f'✅ Bought ${amount} of {symbol_data["result"][0]["displaySymbol"]} at {price_data["c"]}')
-    cursor.execute(f'UPDATE users SET balance = balance - {amount} where user_id = {user_id};')
-    connection.commit()
-    st.session_state.show_buy = True
+    if symbol_data["result"] == []:
+        st.write("❌ Company not found!")
+    else:
+        price = requests.get(f'https://finnhub.io/api/v1/quote?symbol={symbol_data["result"][0]["displaySymbol"]}&token={API_KEY}')
+        price_data = price.json()
+            
+   
+        st.write(f'✅ Bought ${amount} ({int(amount)/int(price_data["c"])} shares) of {symbol_data["result"][0]["displaySymbol"]} at {price_data["c"]}')
+        cursor.execute(f'UPDATE users SET balance = balance - {amount} where user_id = "{st.session_state.user_id}";')
+        cursor.execute(f'INSERT INTO stocks (ticker, buy_price, quantity, company_name) VALUES ("{symbol_data["result"][0]["displaySymbol"]}", {price_data["c"]}, {int(amount)/int(price_data["c"])}, {company_name});')
+        connection.commit()
+        st.session_state.show_buy = False
 
 def view_balance():
-    cursor.execute(f"SELECT balance FROM users WHERE user_id = {user_id};")
-    connection.commit()
-    balance = cursor.fetchall()
-    st.write(balance)
+    cursor.execute(f'SELECT balance FROM users WHERE user_id = "{st.session_state.user_id}";')
+    balance = cursor.fetchone()
+    formatted_balance = f"💰 Balance: ${balance[0]:,.2f}"
+    st.write(formatted_balance)
+    st.rerun()
 
 if not st.session_state.logged_in:
     log_in_button = st.button("Log In")
@@ -106,7 +113,7 @@ if not st.session_state.logged_in:
         if user_id:
             log_in_confirmation = st.button("Log In Confirmation")
             if log_in_confirmation:
-                user_id = log_in(user_id)
+                st.session_state.user_id = log_in(user_id)
                 
 else:
 

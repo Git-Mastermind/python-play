@@ -20,8 +20,8 @@ if "balance_button" not in st.session_state:
     st.session_state.balance_button = False
 if "user_id" not in st.session_state:
     st.session_state.user_id = ""
-if "my_stocks" not in st.session_state:
-    st.session_state.my_stocks = False
+if "portfolio" not in st.session_state:
+    st.session_state.portfolio = False
 
 connection = mysql.connector.connect(
     host="localhost",
@@ -80,19 +80,26 @@ def buy_stock(company_name, amount):
     else:
         price = requests.get(f'https://finnhub.io/api/v1/quote?symbol={symbol_data["result"][0]["displaySymbol"]}&token={API_KEY}')
         price_data = price.json() 
+        ticker = symbol_data["result"][0]["displaySymbol"]
+        buy_price = int(price_data["c"])
+        quantity = int(amount) / buy_price
             
    
-        st.write(f'✅ Bought ${amount} ({int(amount)/int(price_data["c"])} shares) of {symbol_data["result"][0]["displaySymbol"]} at {price_data["c"]}')
+        st.write(f'✅ Bought ${amount} ({quantity} shares) of {ticker} at {buy_price}')
         cursor.execute(f'UPDATE users SET balance = balance - {amount} where user_id = "{st.session_state.user_id}";')
-        cursor.execute(f'INSERT INTO stocks (user_id, ticker, buy_price, quantity, company_name) VALUES ("{user_id}", "{symbol_data["result"][0]["displaySymbol"]}", {price_data["c"]}, {int(amount)/int(price_data["c"])}, {company_name});')
+        cursor.execute(f'INSERT INTO stocks (user_id, ticker, buy_price, quantity, company_name) VALUES ("{st.session_state.user_id}", "{ticker}", {buy_price}, {quantity}, "{company_name}");')
         connection.commit()
+        time.sleep(3)
         st.session_state.show_buy = False
+        st.rerun()
 
 def view_balance():
     cursor.execute(f'SELECT balance FROM users WHERE user_id = "{st.session_state.user_id}";')
     balance = cursor.fetchone()
-    formatted_balance = f"💰 Balance: ${balance[0]:,.2f}"
+    formatted_balance = f"💰 Balance: $150,000.00"
+    uninvested_money = f"🪙 Uninvested Money: ${balance[0]:,.2f}"
     st.write(formatted_balance)
+    st.write(uninvested_money)
     time.sleep(3)
     st.session_state.balance_button = False
     st.rerun()
@@ -124,7 +131,7 @@ else:
     buy_stock_button = st.button("Trade")
     sell_stock_button = st.button("Sell")
     view_balance_button = st.button("View Balance")
-    my_stocks_button = st.button("My Stocks")
+    portfolio_button = st.button("Portfolio")
 
     if buy_stock_button:
         st.session_state.show_buy = True
@@ -142,12 +149,14 @@ else:
     if st.session_state.balance_button:
         view_balance()
     
-    if my_stocks_button:
-        st.session_state.my_stocks = True
-    if st.session_state.my_stocks:
-        cursor.execute(f'SELECT ticker FROM stocks WHERE user_id = "{st.session_state.user_id}";')
-        my_stocks = cursor.fetchall()
-        st.write(my_stocks)
+    if portfolio_button:
+        st.session_state.portfolio = True
+    if st.session_state.portfolio:
+        cursor.execute(f'SELECT ticker, quantity FROM stocks WHERE user_id = "{st.session_state.user_id}";')
+        portfolio = cursor.fetchall()
+        portfolio_formatted = ""
+        print(portfolio)
+            
 
 
 

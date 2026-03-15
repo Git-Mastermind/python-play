@@ -77,12 +77,12 @@ def buy_stock(company_name, amount):
         st.write("❌ Company not found!")
     else:
         price = requests.get(f'https://finnhub.io/api/v1/quote?symbol={symbol_data["result"][0]["displaySymbol"]}&token={API_KEY}')
-        price_data = price.json()
+        price_data = price.json() 
             
    
         st.write(f'✅ Bought ${amount} ({int(amount)/int(price_data["c"])} shares) of {symbol_data["result"][0]["displaySymbol"]} at {price_data["c"]}')
         cursor.execute(f'UPDATE users SET balance = balance - {amount} where user_id = "{st.session_state.user_id}";')
-        cursor.execute(f'INSERT INTO stocks (ticker, buy_price, quantity, company_name) VALUES ("{symbol_data["result"][0]["displaySymbol"]}", {price_data["c"]}, {int(amount)/int(price_data["c"])}, {company_name});')
+        cursor.execute(f'INSERT INTO stocks (user_id, ticker, buy_price, quantity, company_name) VALUES ("{user_id}", "{symbol_data["result"][0]["displaySymbol"]}", {price_data["c"]}, {int(amount)/int(price_data["c"])}, {company_name});')
         connection.commit()
         st.session_state.show_buy = False
 
@@ -120,6 +120,7 @@ else:
     buy_stock_button = st.button("Trade")
     sell_stock_button = st.button("Sell")
     view_balance_button = st.button("View Balance")
+    my_stocks_button = st.button("My Stocks")
 
     if buy_stock_button:
         st.session_state.show_buy = True

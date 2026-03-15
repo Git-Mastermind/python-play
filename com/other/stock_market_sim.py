@@ -20,6 +20,8 @@ if "balance_button" not in st.session_state:
     st.session_state.balance_button = False
 if "user_id" not in st.session_state:
     st.session_state.user_id = ""
+if "my_stocks" not in st.session_state:
+    st.session_state.my_stocks = False
 
 connection = mysql.connector.connect(
     host="localhost",
@@ -91,6 +93,8 @@ def view_balance():
     balance = cursor.fetchone()
     formatted_balance = f"💰 Balance: ${balance[0]:,.2f}"
     st.write(formatted_balance)
+    time.sleep(3)
+    st.session_state.balance_button = False
     st.rerun()
 
 if not st.session_state.logged_in:
@@ -137,6 +141,14 @@ else:
         st.session_state.balance_button = True
     if st.session_state.balance_button:
         view_balance()
+    
+    if my_stocks_button:
+        st.session_state.my_stocks = True
+    if st.session_state.my_stocks:
+        cursor.execute(f'SELECT ticker FROM stocks WHERE user_id = "{st.session_state.user_id}";')
+        my_stocks = cursor.fetchall()
+        st.write(my_stocks)
+
 
 
 

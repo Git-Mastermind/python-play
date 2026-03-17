@@ -104,6 +104,18 @@ def view_balance():
     st.session_state.balance_button = False
     st.rerun()
 
+
+def view_portfolio():
+    cursor.execute(f'SELECT ticker, quantity FROM stocks WHERE user_id = "{st.session_state.user_id}";')
+    portfolio = cursor.fetchall()
+    portfolio_formatted = ""
+    buy_price = cursor.execute(f'SELECT buy_price FROM stocks WHERE user_id = "{st.session_state.user_id}";')
+    current_price_response = requests.get()
+    for i in range (len(portfolio)):
+        portfolio_formatted + portfolio[i][0] + "----> " + str(portfolio[i][1]) + " shares" + "\n"
+    
+    st.write(portfolio_formatted)
+
 if not st.session_state.logged_in:
     log_in_button = st.button("Log In")
     sign_up_button = st.button("Sign Up")
@@ -152,15 +164,7 @@ else:
     if portfolio_button:
         st.session_state.portfolio = True
     if st.session_state.portfolio:
-        cursor.execute(f'SELECT ticker, quantity FROM stocks WHERE user_id = "{st.session_state.user_id}";')
-        portfolio = cursor.fetchall()
-        portfolio_formatted = ""
-        buy_price = cursor.execute(f'SELECT buy_price FROM stocks WHERE user_id = "{st.session_state.user_id}";')
-        current_price_response = requests.get()
-        for i in range (len(portfolio)):
-            portfolio_formatted + portfolio[i][0] + "----> " + str(portfolio[i][1]) + " shares" + "\n"
-        
-        st.write(portfolio_formatted)
+        view_portfolio()
         
 
             

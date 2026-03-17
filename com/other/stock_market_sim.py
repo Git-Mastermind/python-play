@@ -155,7 +155,14 @@ else:
         cursor.execute(f'SELECT ticker, quantity FROM stocks WHERE user_id = "{st.session_state.user_id}";')
         portfolio = cursor.fetchall()
         portfolio_formatted = ""
-        print(portfolio)
+        buy_price = cursor.execute(f'SELECT buy_price FROM stocks WHERE user_id = "{st.session_state.user_id}";')
+        current_price_response = requests.get()
+        for i in range (len(portfolio)):
+            portfolio_formatted + portfolio[i][0] + "----> " + str(portfolio[i][1]) + " shares" + "\n"
+        
+        st.write(portfolio_formatted)
+        
+
             
 
 

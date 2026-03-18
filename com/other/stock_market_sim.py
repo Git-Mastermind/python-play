@@ -33,7 +33,7 @@ connection = mysql.connector.connect(
 
     
 
-cursor = connection.cursor()
+cursor = connection.cursor(buffered=True)
 
 def sign_up(email, name):
     user_id = ""
@@ -109,15 +109,23 @@ def view_portfolio():
     cursor.execute(f'SELECT ticker, quantity FROM stocks WHERE user_id = "{st.session_state.user_id}";')
     portfolio = cursor.fetchall()
     portfolio_formatted = ""
-    buy_price = cursor.execute(f'SELECT buy_price FROM stocks WHERE user_id = "{st.session_state.user_id}";')
-    tickers_request = cursor.execute(f'SELECT ticker FROM stocks WHERE user_id = "{st.session_state.user_id}";')
-    tickers = cursor.fetchone()
     
+    tickers_request = cursor.execute(f'SELECT ticker FROM stocks WHERE user_id = "{st.session_state.user_id}";')
+    tickers = cursor.fetchone()[0]
+    profits = []
 
+    for i in range(len(tickers)):
+        buy_price_request = cursor.execute(f'SELECT buy_price FROM stocks WHERE user_id = "{st.session_state.user_id}" AND ticker = "{tickers[i]}";')
+        buy_price = cursor.fetchone()
+        print(buy_price)
+        current_price_request = requests.get(f'https://finnhub.io/api/v1/quote?symbol={tickers[i]}&token={API_KEY}')
+        current_price_json = current_price_request.json()
+        current_price = int(current_price_json["c"])
+        profits.append((current_price * portfolio[i][1]) - (buy_price * portfolio[i][1]))
 
     
     for i in range (len(portfolio)):
-        portfolio_formatted + portfolio[i][0] + "----> " + str(portfolio[i][1]) + " shares" + "" + "\n"
+        portfolio_formatted + portfolio[i][0] + "----> " + str(portfolio[i][1]) + " shares" + "----> " + str(profits[i]) + "\n"
     
     st.write(portfolio_formatted)
 

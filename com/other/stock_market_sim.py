@@ -110,9 +110,14 @@ def view_portfolio():
     portfolio = cursor.fetchall()
     portfolio_formatted = ""
     buy_price = cursor.execute(f'SELECT buy_price FROM stocks WHERE user_id = "{st.session_state.user_id}";')
-    current_price_response = requests.get()
+    tickers_request = cursor.execute(f'SELECT ticker FROM stocks WHERE user_id = "{st.session_state.user_id}";')
+    tickers = cursor.fetchone()
+    
+
+
+    
     for i in range (len(portfolio)):
-        portfolio_formatted + portfolio[i][0] + "----> " + str(portfolio[i][1]) + " shares" + "\n"
+        portfolio_formatted + portfolio[i][0] + "----> " + str(portfolio[i][1]) + " shares" + "" + "\n"
     
     st.write(portfolio_formatted)
 

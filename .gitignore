@@ -1,3 +1,6 @@
 __init__.cpython-311.pyc
 test_division.cpython-311.pyc
 credentials.env
+venv/
+.env
+__pycache__/

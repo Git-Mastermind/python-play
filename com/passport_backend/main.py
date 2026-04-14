@@ -4,10 +4,12 @@ from pydantic import BaseModel
 import mysql.connector
 import os
 
+# libraries
+
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins = ["http://localhost:5173"],
+    allow_origins = ["*"],
     allow_methods = ["*"],
     allow_headers = ["*"],
 )
@@ -17,7 +19,8 @@ def get_db():
         host=os.getenv("DB_HOST"),
         user=os.getenv("DB_USER"),
         password=os.getenv("DB_PASSWORD"),
-        database=os.getenv("DB_NAME")
+        database=os.getenv("DB_NAME"),
+        port=int(os.getenv("DB_PORT"))
     )
 
 class NewNetwork(BaseModel):

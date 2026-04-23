@@ -13,7 +13,7 @@ def add():
     num2 = int(num2)
     return str(num1 + num2)
 
-@app.route("/sub")
+@app.route("/subtract")
 
 def subtract():
     num1 = request.args.get("num1")
@@ -24,7 +24,7 @@ def subtract():
 
     return str(num1 - num2)
 
-@app.route("/mul")
+@app.route("/multiply")
 
 def multiply():
     num1 = request.args.get("num1")

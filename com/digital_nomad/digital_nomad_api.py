@@ -1,4 +1,24 @@
 from flask import Flask, jsonify, request
 import mysql.connector
+from credentials import HOST, USER, PASSWORD, DATABASE
 
-digital_nomad_db = mysql.connector.connect()
+connection = mysql.connector.connect(
+    host=HOST,
+    user=USER,
+    password=PASSWORD,
+    database=DATABASE
+)
+
+app = Flask(__name__)
+
+@app.route("/get-venues")
+
+def get_venues():
+    cursor = connection.cursor()
+
+    venues_raw_info = cursor.execute("SELECT name, address, wifi_password FROM venues;")
+    venues_info_json = jsonify(venues_raw_info)
+    return venues_info_json
+
+if __name__=="__main__":
+    app.run(debug=True)

@@ -11,14 +11,29 @@ connection = mysql.connector.connect(
 
 app = Flask(__name__)
 
-@app.route("/get-venues")
+
+@app.route("/get-venues", methods=["GET"])
+
 
 def get_venues():
     cursor = connection.cursor()
 
-    venues_raw_info = cursor.execute("SELECT name, address, wifi_password FROM venues;")
-    venues_info_json = jsonify(venues_raw_info)
-    return venues_info_json
+    cursor.execute("SELECT name, address, wifi_password FROM venues;")
+    venues_info = cursor.fetchall()
+    return jsonify(venues_info)
+
+@app.route("/new-venue", methods=["POST"])
+
+def new_venue():
+    cursor = connection.cursor()
+    name = request.args.get("name")
+    address = request.args.get("address")
+    wifi_password = request.args.get("wifi_password")
+
+    cursor.execute("INSERT INTO venues (name, address, wifi_password) VALUES (%s, %s, %s);", [name, address, wifi_password])
+    
+    
+
 
 if __name__=="__main__":
     app.run(debug=True)

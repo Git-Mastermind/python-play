@@ -26,11 +26,6 @@ def get_venues():
 
 def new_venue():
     cursor = connection.cursor()
-    name = request.args.get("name")
-    address = request.args.get("address")
-    wifi_password = request.args.get("wifi_password")
-
-    cursor.execute("INSERT INTO venues (name, address, wifi_password) VALUES (%s, %s, %s);", [name, address, wifi_password])
     
     
 

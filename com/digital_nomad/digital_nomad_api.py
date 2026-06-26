@@ -26,6 +26,7 @@ def get_venues():
 
 def new_venue():
     cursor = connection.cursor()
+    name = request.args.get()
     
     
 

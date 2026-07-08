@@ -4,3 +4,4 @@ credentials.env
 venv/
 .env
 __pycache__/
+user_credentials.py

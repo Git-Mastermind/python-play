@@ -2,8 +2,9 @@ from flask import Flask, request
 import mysql.connector
 import requests
 from user_credentials import HOST, USER, PASSWORD, DATABASE
+import pymysql
 
-conn = mysql.connector.connect(
+conn = pymysql.connect(
     host=HOST,
     user=USER,
     password=PASSWORD,
@@ -20,4 +21,6 @@ def new_wifi_entry():
     password = request.args.get("password")
 
     cursor.execute("INSERT INTO wifi_entries (name, password, downvotes) VALUES (%s, %s, %s);", (name, password, 0))
-    
+
+if __name__ == "__main__":
+    app.run(debug=True)

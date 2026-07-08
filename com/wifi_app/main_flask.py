@@ -1,12 +1,13 @@
 from flask import Flask, request
 import mysql.connector
 import requests
+from user_credentials import HOST, USER, PASSWORD, DATABASE
 
 connection = mysql.connector.connect(
-        host="localhost",
-        user="eshanjha",
-        password="ILovebooks!@#123",
-        database="wifi_db",
+        host=HOST,
+        user=USER,
+        password=PASSWORD,
+        database=DATABASE,
         port=3306
     )
 

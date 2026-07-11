@@ -52,7 +52,7 @@ def downvote():
     if downvotes >= 5:
         cursor.execute("DELETE FROM wifi_entries WHERE id = %s;", (id))
         conn.commit()
-        return {"status":"wifi deleted downvotes high"}, 200
+        return {"status":"wifi deleted"}, 204
      
     cursor.execute("UPDATE wifi_entries SET downvotes = downvotes + 1 WHERE id = %s;", (id))
     conn.commit()

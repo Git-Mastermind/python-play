@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 import mysql.connector
 import requests
-from user_credentials import HOST, USER, PASSWORD, DATABASE
+from user_credentials import HOST, USER, PASSWORD, DATABASE, PORT
 import pymysql
 from pymysql.cursors import DictCursor
 
@@ -9,7 +9,8 @@ conn = pymysql.connect(
     host=HOST,
     user=USER,
     password=PASSWORD,
-    database=DATABASE
+    database=DATABASE,
+    port=PORT
 )
 
 app = Flask(__name__)

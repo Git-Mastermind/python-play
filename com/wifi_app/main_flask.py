@@ -72,7 +72,18 @@ def search():
         return {"status":"no wifis available"}, 400
     return wifi_response, 200
 
+@app.route("/is-in", methods=["GET"])
 
+def is_in():
+    cursor = conn.cursor(DictCursor)
+    name = request.args.get("name")
+
+    cursor.execute("SELECT id FROM wifi_entries WHERE name = %s;", (name))
+    returned_id = cursor.fetchall()
+    if not returned_id:
+        return {"status":"wifi passed is invalid"}, 400
+    else:
+        return {"status":"wifi passed is valid"}, 200
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
-Flask
-pymysql
+flask
+mysql-connector-python
 requests
-cryptography
+pymysql
 gunicorn

@@ -12,7 +12,7 @@ if operation:
             if response.status_code == 200 or response.status_code == 201:
                 st.write(f"✅ wifi successfully created")
             else:
-                st.write(f"❌ error in creating wifi")
+                st.write(f"❌ error in creating wifi ----- status code = {response.status_code}")
     
     if operation == "search":
         name = st.text_input("name")

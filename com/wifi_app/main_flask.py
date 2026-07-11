@@ -1,9 +1,18 @@
 from flask import Flask, request, jsonify
 import mysql.connector
 import requests
-from user_credentials import HOST, USER, PASSWORD, DATABASE, PORT
 import pymysql
 from pymysql.cursors import DictCursor
+import os
+
+try:
+    HOST = os.environ.get("HOST")
+    USER = os.environ.get("USER")
+    PASSWORD = os.environ.get("PASSWORD")
+    DATABASE = os.environ.get("DATABASE")
+    PORT = int(os.environ.get("PORT", 3306))
+except:
+    from user_credentials import HOST, USER, PASSWORD, DATABASE, PORT
 
 conn = pymysql.connect(
     host=HOST,
@@ -12,6 +21,17 @@ conn = pymysql.connect(
     database=DATABASE,
     port=PORT
 )
+# Run this once to build the table on your new cloud database
+with conn.cursor() as setup_cursor:
+    setup_cursor.execute("""
+    CREATE TABLE IF NOT EXISTS wifi_entries (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255),
+        password VARCHAR(255),
+        downvotes INT DEFAULT 0
+    );
+    """)
+    conn.commit()
 
 app = Flask(__name__)
 

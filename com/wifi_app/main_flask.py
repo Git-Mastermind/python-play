@@ -66,7 +66,8 @@ def downvote():
     cursor = conn.cursor(DictCursor)
     id = request.args.get("id")
 
-    wifi = cursor.execute("SELECT downvotes FROM wifi_entries WHERE id = %s;", (id))
+    cursor.execute("SELECT downvotes FROM wifi_entries WHERE id = %s;", (id))
+    wifi = cursor.fetchall()
     if not wifi:
         return {"status":"invalid name or id"}, 400
     downvotes = cursor.fetchall()[0]["downvotes"]

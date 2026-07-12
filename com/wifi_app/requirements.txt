@@ -1,5 +1,5 @@
-flask
-mysql-connector-python
-requests
+Flask
 pymysql
+cryptography
 gunicorn
+requests 

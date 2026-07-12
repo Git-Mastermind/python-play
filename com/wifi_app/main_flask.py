@@ -1,5 +1,4 @@
 from flask import Flask, request, jsonify
-import mysql.connector
 import requests
 import pymysql
 from pymysql.cursors import DictCursor

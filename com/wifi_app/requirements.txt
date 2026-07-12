@@ -1,5 +1,5 @@
-Flask
+flask
 pymysql
 cryptography
-gunicorn
-requests 
+requests
+streamlit

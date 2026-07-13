@@ -3,7 +3,17 @@ import requests
 import pymysql
 from pymysql.cursors import DictCursor
 import os
-from user_credentials import *
+
+
+try:
+    HOST = os.environ.get("HOST")
+    USER = os.environ.get("USER")
+    PASSWORD = os.environ.get("PASSWORD")
+    DATABASE = os.environ.get("DATABASE")
+    PORT = int(os.environ.get("PORT", 3306))
+except Exception:
+    # 2. If running locally, fall back to your gitignored file
+    from user_credentials import HOST, USER, PASSWORD, DATABASE, PORT
 
 
 conn = pymysql.connect(

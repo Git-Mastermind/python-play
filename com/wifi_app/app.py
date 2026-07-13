@@ -10,7 +10,7 @@ if os.environ.get("HOST"):
     USER = os.environ.get("USER")
     PASSWORD = os.environ.get("PASSWORD")
     DATABASE = os.environ.get("DATABASE")
-    DB_PORT = int(os.environ.get("PORT", 3306))
+    DB_PORT = int(os.environ.get("DB_PORT", 18654))
 else:
     # Local fallback
     from user_credentials import HOST, USER, PASSWORD, DATABASE, DB_PORT
@@ -21,7 +21,8 @@ conn = pymysql.connect(
     user=USER,
     password=PASSWORD,
     database=DATABASE,
-    port=DB_PORT
+    port=DB_PORT,
+    ssl={"ssl": {}}
 )
 # Run this once to build the table on your new cloud database
 with conn.cursor() as setup_cursor:

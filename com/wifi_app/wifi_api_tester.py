@@ -1,6 +1,8 @@
 import streamlit as st
 import requests
 
+
+
 operation = st.segmented_control("", ["new wifi", "search", "get wifis", "downvote"])
 if operation:
     if operation == "new wifi":

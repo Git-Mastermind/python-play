@@ -58,7 +58,7 @@ def new_wifi_entry():
 def get_wifis():
     cursor = conn.cursor(DictCursor)
 
-    cursor.execute("SELECT * FROM wifi_entries;")
+    cursor.execute("SELECT * FROM wifi_entries;") 
     wifis_response = cursor.fetchall()
     cursor.close()
     return jsonify(wifis_response), 200

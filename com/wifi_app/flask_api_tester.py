@@ -13,7 +13,7 @@ while True:
     elif operation == "g":
         get_all_wifis_url = " http://127.0.0.1:5000/get-wifis"
         response = requests.get(get_all_wifis_url)
-        print(response)
+        print(response.text)
     elif operation == "d":
         id = input("id: ")
 

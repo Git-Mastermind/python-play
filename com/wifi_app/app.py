@@ -12,7 +12,6 @@ if os.environ.get("HOST"):
     DATABASE = os.environ.get("DATABASE")
     DB_PORT = int(os.environ.get("DB_PORT", 18654))
 else:
-    # Local fallback
     from user_credentials import HOST, USER, PASSWORD, DATABASE, DB_PORT
 
 

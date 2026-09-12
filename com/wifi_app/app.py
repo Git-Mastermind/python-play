@@ -23,7 +23,6 @@ conn = pymysql.connect(
     port=DB_PORT,
     ssl={"ssl": {}}
 )
-# Run this once to build the table on your new cloud database
 with conn.cursor() as setup_cursor:
     setup_cursor.execute("""
     CREATE TABLE IF NOT EXISTS wifi_entries (

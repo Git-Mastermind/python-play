@@ -73,7 +73,7 @@ def downvote():
     wifi = cursor.fetchall()
     if not wifi:
         return {"status":"invalid name or id"}, 400
-    downvotes = cursor.fetchall()[0]["downvotes"]
+    downvotes = wifi[0]["downvotes"]
     if downvotes >= 5:
         cursor.execute("DELETE FROM wifi_entries WHERE id = %s;", (id))
         conn.commit()
@@ -95,7 +95,7 @@ def search():
     wifi_response = cursor.fetchall()
     if not wifi_response:
         return {"status":"no wifis available"}, 400
-    return wifi_response, 200
+    return wifi_response[0], 200
 
 @app.route("/is-in", methods=["GET"])
 

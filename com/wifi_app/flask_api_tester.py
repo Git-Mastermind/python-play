@@ -1,4 +1,5 @@
 import requests
+import json
 
 while True:
 
@@ -13,7 +14,25 @@ while True:
     elif operation == "g":
         get_all_wifis_url = " http://127.0.0.1:5000/get-wifis"
         response = requests.get(get_all_wifis_url)
-        print(response.text)
+        data = response.json()
+        parsed = [
+            {   
+                "id" : item["id"],
+                "name" : item["name"],
+                "password" : item["password"],
+                "downvotes" : item["downvotes"]
+            }
+            for item in data
+        ]
+        for wifi in parsed:
+            print(f"""
+            NAME : {wifi['name']}
+            PASSWORD : {wifi['password']}
+            DOWNVOTES : {wifi['downvotes']} 
+            ID : {wifi['id']}
+
+""")
+        
     elif operation == "d":
         id = input("id: ")
 
@@ -24,7 +43,7 @@ while True:
         name = input("name: ")
         search_url = f"http://127.0.0.1:5000/search?name={name}"
         response = requests.get(search_url)
-        print(response)
+        
 
    
 

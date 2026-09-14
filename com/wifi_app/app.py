@@ -4,7 +4,7 @@ import pymysql
 from pymysql.cursors import DictCursor
 import os
 
-
+# get all credentials from file
 if os.environ.get("HOST"):
     HOST = os.environ.get("HOST")
     USER = os.environ.get("USER")
@@ -14,7 +14,7 @@ if os.environ.get("HOST"):
 else:
     from user_credentials import HOST, USER, PASSWORD, DATABASE, DB_PORT
 
-
+# create connection with mysql
 conn = pymysql.connect(
     host=HOST,
     user=USER,
@@ -33,9 +33,9 @@ with conn.cursor() as setup_cursor:
     );
     """)
     conn.commit()
-
+# create app
 app = Flask(__name__)
-
+# at app route of /new-entry do function below
 @app.route("/new-entry", methods = ["POST"])
 
 def new_wifi_entry():
@@ -43,6 +43,7 @@ def new_wifi_entry():
     name = request.args.get("name")
     password = request.args.get("password")
 
+    # create a new wifi inserting credentials
     cursor.execute("INSERT INTO wifi_entries (name, password, downvotes) VALUES (%s, %s, %s);", (name, password, 0))
     conn.commit()
     cursor.close()

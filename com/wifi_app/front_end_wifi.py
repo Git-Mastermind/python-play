@@ -1,7 +1,13 @@
 import streamlit as st
 import requests
+import os
 
-API_BASE = "http://127.0.0.1:5000"
+# Uses Streamlit secrets when deployed (see .streamlit/secrets.toml),
+# falls back to your local Flask server for local development.
+try:
+    API_BASE = st.secrets["API_BASE"]
+except (FileNotFoundError, KeyError):
+    API_BASE = os.environ.get("API_BASE", "http://127.0.0.1:5000")
 
 st.set_page_config(page_title="OpenWifi", page_icon="📶", layout="centered")
 
@@ -138,6 +144,8 @@ with tab_browse:
         else:
             for wifi in wifis:
                 render_wifi_card(wifi)
+
+    st.caption("Just submitted a wifi? Reload the page to see it here.")
 
 # ---------- Add ----------
 with tab_add:

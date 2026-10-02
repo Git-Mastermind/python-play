@@ -3,6 +3,7 @@ import requests
 import pymysql
 from pymysql.cursors import DictCursor
 import os
+# from credentials.py import DB_HOST, DB_USER, DB_PASSWORD, DB_NAME
 
 # get all credentials from file
 if os.environ.get("HOST"):
@@ -10,18 +11,15 @@ if os.environ.get("HOST"):
     USER = os.environ.get("USER")
     PASSWORD = os.environ.get("PASSWORD")
     DATABASE = os.environ.get("DATABASE")
-    DB_PORT = int(os.environ.get("DB_PORT", 18654))
 else:
-    from user_credentials import HOST, USER, PASSWORD, DATABASE, DB_PORT
+    from user_credentials import HOST, USER, PASSWORD, DATABASE
 
 # create connection with mysql
 conn = pymysql.connect(
     host=HOST,
     user=USER,
     password=PASSWORD,
-    database=DATABASE,
-    port=DB_PORT,
-    ssl={"ssl": {}}
+    database=DATABASE
 )
 with conn.cursor() as setup_cursor:
     setup_cursor.execute("""
@@ -29,7 +27,8 @@ with conn.cursor() as setup_cursor:
         id INT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(255),
         password VARCHAR(255),
-        downvotes INT DEFAULT 0
+        downvotes INT NOT NULL DEFAULT 0,
+        upvotes INT NOT NULL DEFAULT 0
     );
     """)
     conn.commit()
@@ -71,7 +70,7 @@ def downvote():
     cursor.execute("SELECT downvotes FROM wifi_entries WHERE id = %s;", (id))
     wifi = cursor.fetchall()
     if not wifi:
-        return {"status":"invalid name or id"}, 400
+        return {"status":"invalid id"}, 400
     downvotes = wifi[0]["downvotes"]
     if downvotes >= 5:
         cursor.execute("DELETE FROM wifi_entries WHERE id = %s;", (id))
@@ -84,6 +83,21 @@ def downvote():
 
     return {"status":"updated downvotes"}, 200
 
+@app.route("/upvote", methods=["POST"])
+
+def upvote():
+    cursor = conn.cursor(DictCursor)
+    id = request.args.get("id")
+
+    cursor.execute("SELECT upvotes FROM wifi_entries WHERE id = %s;", (id))
+    upvote_response = cursor.fetchall()
+    if not upvote_response:
+        return {"status":"invalid id"}, 400
+    cursor.execute("UPDATE wifi_entries SET upvotes = upvotes + 1 WHERE id = %s;", (id))
+    conn.commit()
+    cursor.close()
+    return {"status":"successfully upvoted the wifi"}, 200
+
 @app.route("/search", methods=["GET"])
 
 def search():
@@ -92,9 +106,11 @@ def search():
 
     cursor.execute("SELECT * FROM wifi_entries WHERE name = %s;", (name))
     wifi_response = cursor.fetchall()
+    cursor.close()
     if not wifi_response:
         return {"status":"no wifis available"}, 400
     return wifi_response[0], 200
+    
 
 @app.route("/is-in", methods=["GET"])
 
@@ -104,6 +120,7 @@ def is_in():
 
     cursor.execute("SELECT id FROM wifi_entries WHERE name = %s;", (name))
     returned_id = cursor.fetchall()
+    cursor.close()
     if not returned_id:
         return {"status":"wifi passed is invalid"}, 400
     else:

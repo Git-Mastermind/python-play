@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 import os
+import difflib
 
 # Uses Streamlit secrets when deployed (see .streamlit/secrets.toml),
 # falls back to your local Flask server for local development.
@@ -58,6 +59,32 @@ st.markdown("""
     font-size: 0.82rem;
     margin-top: 8px;
 }
+.wifi-id-badge {
+    display: inline-block;
+    background-color: #eef2ff;
+    color: #4338ca !important;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-top: 8px;
+    margin-right: 8px;
+    border: 1px solid #c7d2fe;
+}
+.wifi-downvotes {
+    color: #9ca3af !important;
+    font-size: 0.82rem;
+}
+.notice-box {
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-left: 4px solid #9ca3af;
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin: 10px 0;
+    color: #374151 !important;
+    font-size: 0.95rem;
+}
 footer {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
@@ -70,8 +97,8 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-tab_browse, tab_add, tab_search, tab_downvote = st.tabs(
-    ["🌐 Browse", "➕ Add", "🔍 Search", "👎 Downvote"]
+tab_browse, tab_add, tab_search = st.tabs(
+    ["🌐 Browse", "➕ Add", "🔍 Search"]
 )
 
 
@@ -86,9 +113,10 @@ def normalize_wifi_list(payload):
 
     # API returned a single wifi object instead of a list
     if isinstance(payload, dict):
-        # Some APIs return {"error": "..."} or {"message": "..."} on no match
+        # Some APIs return {"error": "..."} or {"message": "..."} when there's
+        # no match. That's a normal empty result, not a real failure.
         if "error" in payload or "message" in payload:
-            return [], payload.get("error") or payload.get("message")
+            return [], None
         return [payload], None
 
     # API returned a proper list
@@ -101,44 +129,111 @@ def normalize_wifi_list(payload):
     return [], f"Unexpected response format: {payload!r}"
 
 
+def suggest_similar_names(searched_name, all_wifis, limit=3):
+    """Find close-spelling matches from the full wifi list, for a 'did you mean' hint."""
+    all_names = list({wifi.get("name", "") for wifi in all_wifis if wifi.get("name")})
+    return difflib.get_close_matches(searched_name, all_names, n=limit, cutoff=0.5)
+
+
+def friendly_notice(message):
+    """A calm, non-alarming way to show problems instead of Streamlit's red error box."""
+    st.markdown(f"""
+    <div class="notice-box">🙁 &nbsp;{message}</div>
+    """, unsafe_allow_html=True)
+
+
+def downvote_wifi(wifi_id):
+    """Send a downvote and show a status-appropriate message. Returns True on success."""
+    _, error, status = fetch_json("POST", f"{API_BASE}/downvote", params={"id": wifi_id})
+    if error:
+        friendly_notice("We couldn't submit your downvote right now. Please check your connection and try again.")
+        return False
+    elif is_server_side_issue(status):
+        friendly_notice("Something went wrong on our end submitting your downvote. Please try again shortly.")
+        return False
+    elif is_client_side_issue(status):
+        st.warning("That downvote couldn't be submitted — the wifi may no longer exist.")
+        return False
+    else:
+        return True
+
+
 def render_wifi_card(item):
     name = item.get("name", "Unknown")
     password = item.get("password", "—")
     wifi_id = item.get("id", "—")
     downvotes = item.get("downvotes", 0)
 
-    st.markdown(f"""
-    <div class="wifi-card">
-        <div class="wifi-name">{name}</div>
-        <div class="wifi-pass">{password}</div>
-        <div class="wifi-meta">ID: {wifi_id} &nbsp;•&nbsp; 👎 {downvotes} downvotes</div>
-    </div>
-    """, unsafe_allow_html=True)
+    col1, col2 = st.columns([5, 1])
+
+    with col1:
+        st.markdown(f"""
+        <div class="wifi-card">
+            <div class="wifi-name">{name}</div>
+            <div class="wifi-pass">{password}</div>
+            <div>
+                <span class="wifi-id-badge">ID: {wifi_id}</span>
+                <span class="wifi-downvotes">👎 {downvotes} downvotes</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col2:
+        if st.button("👎", key=f"downvote_{wifi_id}", help="Downvote this wifi", use_container_width=True):
+            if downvote_wifi(wifi_id):
+                st.rerun()
 
 
 def fetch_json(method, url, **kwargs):
-    """Make a request and safely parse JSON, returning (data, error_message)."""
+    """
+    Make a request and safely parse JSON.
+    Returns (data, network_error, status_code).
+
+    network_error is only set when the request never got a response at all
+    (server down, timeout, DNS failure, etc). Any HTTP status code that DID
+    come back — including 400, 404, 422 — is returned as-is in status_code,
+    since different APIs use different codes for "no match" or "bad input",
+    and none of those mean the request itself failed.
+    """
     try:
         response = requests.request(method, url, timeout=5, **kwargs)
-        response.raise_for_status()
-        try:
-            return response.json(), None
-        except ValueError:
-            return None, "The server didn't return valid JSON."
-    except requests.exceptions.RequestException as e:
-        return None, f"Couldn't reach the server: {e}"
+    except requests.exceptions.RequestException:
+        return None, "network_error", None
+
+    try:
+        data = response.json()
+    except ValueError:
+        data = None
+
+    return data, None, response.status_code
+
+
+def is_client_side_issue(status):
+    """
+    True for any 4xx status — these mean 'no match' or 'bad input',
+    not a real server/network failure. Covers 400, 404, 422, etc. at once,
+    since APIs aren't consistent about which one they use for 'not found'.
+    """
+    return status is not None and 400 <= status < 500
+
+
+def is_server_side_issue(status):
+    """True for 5xx — an actual problem on the server, worth a generic apology message."""
+    return status is not None and status >= 500
 
 
 # ---------- Browse ----------
 with tab_browse:
-    payload, error = fetch_json("GET", f"{API_BASE}/get-wifis")
+    payload, error, status = fetch_json("GET", f"{API_BASE}/get-wifis")
 
     if error:
-        st.error(error)
+        friendly_notice("We couldn't load the wifi list right now. Please check your connection and try again.")
+    elif is_server_side_issue(status):
+        friendly_notice("Something went wrong on our end loading the wifi list. Please try again shortly.")
     else:
         wifis, list_error = normalize_wifi_list(payload)
         if list_error:
-            st.error(list_error)
+            friendly_notice("Something went wrong loading the wifi list. Please try again shortly. (API closed?)")
         elif not wifis:
             st.info("No wifis added yet. Be the first!")
         else:
@@ -158,12 +253,16 @@ with tab_add:
         if not name or not password:
             st.warning("Please fill in both fields.")
         else:
-            _, error = fetch_json(
+            _, error, status = fetch_json(
                 "POST", f"{API_BASE}/new-entry",
                 params={"name": name, "password": password},
             )
             if error:
-                st.error(error)
+                friendly_notice("We couldn't add your wifi right now. Please check your connection and try again.")
+            elif is_server_side_issue(status):
+                friendly_notice("Something went wrong on our end adding your wifi. Please try again shortly.")
+            elif is_client_side_issue(status):
+                st.warning("That entry couldn't be added — it may already exist, or the name/password format wasn't accepted.")
             else:
                 st.success(f"✅ '{name}' was added!")
 
@@ -171,32 +270,37 @@ with tab_add:
 with tab_search:
     name = st.text_input("Search by name")
     if name:
-        payload, error = fetch_json("GET", f"{API_BASE}/search", params={"name": name})
+        payload, error, status = fetch_json("GET", f"{API_BASE}/search", params={"name": name})
+
+        no_match = False
 
         if error:
-            st.error(error)
+            friendly_notice("We couldn't complete your search right now. Please check your connection and try again.")
+        elif is_server_side_issue(status):
+            friendly_notice("Something went wrong on our end searching. Please try again shortly.")
+        elif is_client_side_issue(status):
+            # Any 4xx here (400, 404, 422...) means "no match" or "bad input" — not a real failure.
+            no_match = True
         else:
             wifis, list_error = normalize_wifi_list(payload)
             if list_error:
-                st.error(list_error)
+                friendly_notice("Something went wrong with that search. Please try again shortly.")
             elif not wifis:
-                st.info("No matches found.")
+                no_match = True
             else:
                 for wifi in wifis:
                     render_wifi_card(wifi)
 
-# ---------- Downvote ----------
-with tab_downvote:
-    with st.form("downvote_form"):
-        wifi_id = st.text_input("Wifi ID")
-        submitted = st.form_submit_button("Downvote", use_container_width=True)
+        if no_match:
+            all_payload, all_error, all_status = fetch_json("GET", f"{API_BASE}/get-wifis")
+            all_wifis = []
+            if not all_error and not is_client_side_issue(all_status) and not is_server_side_issue(all_status):
+                all_wifis, _ = normalize_wifi_list(all_payload)
 
-    if submitted:
-        if not wifi_id:
-            st.warning("Please enter an ID.")
-        else:
-            _, error = fetch_json("POST", f"{API_BASE}/downvote", params={"id": wifi_id})
-            if error:
-                st.error(error)
+            suggestions = suggest_similar_names(name, all_wifis)
+
+            if suggestions:
+                suggestion_text = ", ".join(f"**{s}**" for s in suggestions)
+                st.warning(f"No wifi found named '{name}'. Did you mean: {suggestion_text}?")
             else:
-                st.success("✅ Downvoted!")
+                st.info(f"No wifi found named '{name}'. Double check the spelling, or browse all networks instead.")

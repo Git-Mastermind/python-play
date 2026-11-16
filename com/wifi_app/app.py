@@ -41,7 +41,7 @@ finally:
     init_conn.close()
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": ["http://localhost:5173", "https://wifi-app-frontend.vercel.app"]}})
+CORS(app, resources={r"/*": {"origins": ["http://localhost:5173", "https://opensignal-wifi.vercel.app"]}})
 
 profanity.load_censor_words()
 BLOCKED_TERMS = {"goon", "gooning", "skibidi", "gyatt", "rizz", "diddy", "spam", "stupid", "idiot", "dumb"}
